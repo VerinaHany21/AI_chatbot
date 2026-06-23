@@ -1,6 +1,6 @@
 ---
 title: AI Chatbot
-emoji: 🐨
+emoji: 🤖
 colorFrom: pink
 colorTo: gray
 sdk: gradio
