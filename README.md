@@ -1,3 +1,13 @@
+---
+title: AI Chatbot with LLM & RAG
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+app_file: app.py
+pinned: false
+---
+
 # AI Chatbot with LLM & RAG
 
 A conversational AI assistant that answers questions from general knowledge **and** from uploaded PDF documents. Built with Python, LangChain, ChromaDB, and Gradio — runs fully offline via Ollama or in the cloud via OpenRouter.
