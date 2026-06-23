@@ -19,6 +19,7 @@ if USE_LOCAL_LLAMA:
     client = OpenAI(
         base_url="http://localhost:11434/v1",
         api_key="ollama"  # Ollama doesn't need a real key, but the library requires something
+                          # you have to download Ollama and run a local model for this to work
     )
     # When using Ollama, we use a single local model (no fallback needed)
     MODELS = ["llama3.2:3b"]
