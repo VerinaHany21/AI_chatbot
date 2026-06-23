@@ -1,4 +1,5 @@
 ---
+<<<<<<< HEAD
 title: AI Chatbot with LLM & RAG
 emoji: 🤖
 colorFrom: blue
@@ -168,3 +169,18 @@ sentence-transformers
 ```
 
 Install with: `pip install -r requirements.txt`
+=======
+title: AI Chatbot
+emoji: 🐨
+colorFrom: pink
+colorTo: gray
+sdk: gradio
+sdk_version: 6.19.0
+python_version: '3.13'
+app_file: app.py
+pinned: false
+short_description: Conversational AI chatbot with RAG pipeline
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+>>>>>>> 05b22ae28a0e8d249b761430d1affe66ea2d00cc
