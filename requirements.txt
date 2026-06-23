@@ -1,0 +1,10 @@
+openai
+langchain
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+chromadb
+gradio
+python-dotenv
+pypdf
+sentence-transformers

@@ -1,0 +1,17 @@
+# API Keys and Secrets
+.env
+
+# Python Environment and Packages
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Local Vector Database Storage (ChromaDB)
+.chroma/
+chroma_db/
+
+# OS Specific Files
+.DS_Store
+Thumbs.db
