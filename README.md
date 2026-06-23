@@ -33,13 +33,15 @@ Is a PDF uploaded?
 - **Automatic model fallback** — if a cloud model returns a 429 rate-limit error, the next model in the priority list is tried silently
 - **PDF ingestion** — chunking with 100-character overlap prevents sentences from being cut off at boundaries
 - **Pipeline transparency** — every reply is labelled `[RAG Pipeline]` or `[Generic Pipeline]` so the routing decision is always visible
-
+- **Automated CI/CD Pipeline** — configured with GitHub Actions to automatically deploy the latest production code to a live Hugging Face Space on every push to the `main` branch.
 ---
 
 ## Project Structure
 
 ```
 ai-chatbot/
+├── .github/workflows/
+│   └── sync.yml        # GitHub Actions CI/CD deployment script
 ├── app.py              # Gradio UI
 ├── engine.py           # LLM calls, RAG pipeline, PDF processing, query router
 ├── requirements.txt    # Python dependencies
@@ -48,6 +50,15 @@ ai-chatbot/
 ```
 
 ---
+## Live Deployment
+
+The production version of this application is automatically built and hosted in the cloud via Hugging Face Spaces. 
+
+🔗 **[Live Demo: Try the Chatbot Here](https://huggingface.co/spaces/YOUR_USERNAME/ai-chatbot)**
+*(Note: Replace that link with your actual Hugging Face Space URL!)*
+
+---
+
 
 ## Setup
 
