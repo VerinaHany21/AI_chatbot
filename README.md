@@ -1,53 +1,149 @@
----
-title: Hybrid AI Chatbot with RAG
-emoji: 🤖
-colorFrom: blue
-colorTo: indigo
-sdk: gradio
-app_file: app.py
-pinned: false
----
+# AI Chatbot with LLM & RAG
 
-# Hybrid AI Chatbot with RAG
-
-An intelligent, production-ready conversational assistant built with Python, Gradio, and LangChain. This project features a dual-pipeline routing architecture that seamlessly toggles between local offline execution (via Ollama) and robust cloud endpoints (via OpenRouter), incorporating Retrieval-Augmented Generation (RAG) to dynamically query custom PDF documentation.
-
-## 🧠 System Architecture (How it Works)
-
-This application is designed to mimic enterprise-level AI systems by decoupling the hardware layer from the logic layer. 
-
-1. **The Gateway Switch:** The core engine contains a master boolean toggle (`USE_LOCAL_LLAMA`). When set to `True`, the system routes all traffic to a local, hardware-bound model (e.g., LLaMA 3.2 3B). When `False`, it routes to the OpenRouter API cloud infrastructure.
-2. **Dynamic Intent Router:** Every user prompt is intercepted by a "Gatekeeper" LLM prompt set to `temperature=0.0`. This router evaluates the syntax and intent of the user's text to determine if they are asking a general knowledge question, or if they are referencing an uploaded document.
-3. **The RAG Pipeline:** If the router detects a document reference, the system queries a local **ChromaDB** vector database. It uses `all-MiniLM-L6-v2` (via Hugging Face) to find the text fragments most semantically similar to the user's question, injects them into a strict context window, and forces the LLM to answer using *only* the retrieved facts.
-4. **The Generic Pipeline:** If no document is needed, the system bypasses the vector database entirely and acts as a standard conversational agent at `temperature=0.7` for fluid, natural dialogue.
-
-## ✨ Key Features
-
-* **Hardware Agnostic:** Can run completely offline on edge devices or scale infinitely using cloud API endpoints.
-* **Resilient Cloud Failover:** Built-in sequential fallback orchestration automatically cycles through a priority list of free cloud LLMs (Llama 3.3, DeepSeek, Gemma) if upstream providers throw `429 Rate Limit` exceptions.
-* **Automated PDF Ingestion:** Uses `PyPDFLoader` and a `RecursiveCharacterTextSplitter` to handle document chunking with logical sentence overlaps, preventing data loss at fragment boundaries.
-* **Modern API UI Stream:** Utilizes Gradio's modern dictionary-based chat history format, cleanly managing system/user/assistant roles natively.
+A conversational AI assistant that answers questions from general knowledge **and** from uploaded PDF documents. Built with Python, LangChain, ChromaDB, and Gradio — runs fully offline via Ollama or in the cloud via OpenRouter.
 
 ---
 
-## 🛠️ Local Installation & Setup (For Developers)
+## How It Works
 
-If you are a developer looking to review the code or run this architecture locally on your machine, follow these steps:
+```
+User sends a message
+        ↓
+Is a PDF uploaded?
+   ├── No  → Generic Pipeline (general knowledge)
+   └── Yes → Route query via LLM classifier
+                 ├── GENERIC → answer from general knowledge
+                 └── RAG     → retrieve PDF chunks → inject context → answer from PDF
+```
 
-### 1. Prerequisites
-* **Python 3.9+**
-* **Ollama** (Only required if you intend to test the local hardware execution path).
+**RAG Pipeline steps:**
+1. Uploaded PDF is split into overlapping 1000-character chunks
+2. Each chunk is embedded using `all-MiniLM-L6-v2` (runs locally, no API needed)
+3. Vectors are stored in an in-memory ChromaDB instance
+4. On each query, the 5 most semantically similar chunks are retrieved
+5. Retrieved chunks are injected into the system prompt; the LLM answers from them only
 
-### 2. Clone and Install Dependencies
+**Query routing** uses a separate LLM call at `temperature=0.0` to classify whether the user's question targets the uploaded document or general knowledge — keeping the two pipelines cleanly separated.
+
+---
+
+## Key Features
+
+- **Dual deployment modes** — toggle between local Ollama and OpenRouter cloud with a single boolean flag (`USE_LOCAL_LLAMA` in `engine.py`)
+- **Automatic model fallback** — if a cloud model returns a 429 rate-limit error, the next model in the priority list is tried silently
+- **PDF ingestion** — chunking with 100-character overlap prevents sentences from being cut off at boundaries
+- **Pipeline transparency** — every reply is labelled `[RAG Pipeline]` or `[Generic Pipeline]` so the routing decision is always visible
+
+---
+
+## Project Structure
+
+```
+ai-chatbot/
+├── app.py              # Gradio UI
+├── engine.py           # LLM calls, RAG pipeline, PDF processing, query router
+├── requirements.txt    # Python dependencies
+├── .env                # API key (never commit this)
+└── .gitignore
+```
+
+---
+
+## Setup
+
+### Prerequisites
+
+- Python 3.9+
+- Git
+- Ollama (only for local mode)
+
+### Install dependencies
+
 ```bash
-git clone [https://github.com/VerinaHany21/AI_chatbot.git]
+git clone https://github.com/YOUR_USERNAME/ai-chatbot.git
+cd ai-chatbot
 python -m venv venv
 
-# Activate the virtual environment
-# On Windows:
+# Activate — Windows:
 venv\Scripts\activate
-# On Mac/Linux:
+# Activate — Mac/Linux:
 source venv/bin/activate
 
-# Install the required packages
 pip install -r requirements.txt
+```
+
+### Local mode (offline, free)
+
+1. Download and install [Ollama](https://ollama.com)
+2. Pull the model: `ollama pull llama3.2:3b`
+3. Set `USE_LOCAL_LLAMA = True` in `engine.py`
+4. In a separate terminal: `ollama serve`
+5. Run: `python app.py`
+
+### Cloud mode (OpenRouter)
+
+1. Create a free account at [openrouter.ai](https://openrouter.ai) and generate an API key
+2. Create a `.env` file in the project root:
+   ```
+   OPENROUTER_API_KEY=sk-or-v1-your-key-here
+   ```
+3. Set `USE_LOCAL_LLAMA = False` in `engine.py`
+4. Run: `python app.py`
+
+The app is available at `http://127.0.0.1:7860`.
+
+---
+
+## Usage
+
+| Task | What to do |
+|---|---|
+| General question | Type and send — no PDF needed |
+| PDF question | Upload a PDF, wait for *"Success! Processed X chunks"*, then ask |
+| Clear history | Click **Clear chat** |
+
+---
+
+## Cloud Model Fallback Order
+
+When running in cloud mode, models are tried in this order if any is rate-limited:
+
+1. `openrouter/auto` (auto-selects best available free model)
+2. `meta-llama/llama-4-scout:free`
+3. `meta-llama/llama-3.3-70b-instruct:free`
+4. `deepseek/deepseek-v3:free`
+5. `google/gemma-3-12b:free`
+
+---
+
+## Tech Stack
+
+| Component | Tool |
+|---|---|
+| LLM (local) | Ollama + Llama 3.2 3B |
+| LLM (cloud) | OpenRouter API |
+| Embeddings | `all-MiniLM-L6-v2` (HuggingFace) |
+| Vector store | ChromaDB (in-memory) |
+| RAG framework | LangChain |
+| PDF parsing | PyPDF |
+| UI | Gradio |
+| Environment | python-dotenv |
+
+---
+
+## Requirements
+
+```
+openai
+langchain
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+chromadb
+gradio
+python-dotenv
+pypdf
+sentence-transformers
+```
+
+Install with: `pip install -r requirements.txt`
