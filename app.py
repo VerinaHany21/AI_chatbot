@@ -38,7 +38,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             file_input.upload(fn=upload_pdf, inputs=file_input, outputs=upload_status)
 
         with gr.Column(scale=3):
-            chatbot = gr.Chatbot(label="Chat")
+            chatbot = gr.Chatbot(label="Chat", type="messages")
             msg_input = gr.Textbox(
                 label="Your message",
                 placeholder="Ask something..."
