@@ -60,7 +60,7 @@ ai-chatbot/
 ### Install dependencies
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-chatbot.git
+git clone https://github.com/VerinaHany21/AI_chatbot.git
 cd ai-chatbot
 python -m venv venv
 
